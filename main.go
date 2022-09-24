@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"os"
 
 	"github.com/gin-gonic/gin"
 	"github.com/go-sql-driver/mysql"
@@ -109,6 +110,20 @@ func getDeviceById(c *gin.Context) {
 	}
 }
 
+func staticFileService(c *gin.Context) {
+	fileDir := c.Query("fileDir")
+	fileName := c.Query("fileName")
+
+	_, err := os.Open(fileDir + "/" + fileName)
+	if err != nil {
+		c.IndentedJSON(http.StatusNotFound, gin.H{})
+	}
+	c.Header("Content-Type", "application/octet-stream")
+	c.Header("Content-Disposition", "attachment; filename="+fileName)
+	c.Header("Content-Transfer-Encoding", "binary")
+	c.File(fileDir + "/" + fileName)
+}
+
 func main() {
 	initDB()
 	initDB2()
@@ -116,6 +131,7 @@ func main() {
 	router := gin.Default()
 	router.GET("/albums", getDevices)
 	router.GET("/albums/:id", getDeviceById)
+	router.GET("/files", staticFileService)
 
 	router.Run("0.0.0.0:8080")
 }
