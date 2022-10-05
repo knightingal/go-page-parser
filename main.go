@@ -133,6 +133,7 @@ func main() {
 	router := gin.Default()
 	router.GET("/albums", getDevices)
 	router.GET("/section", getSectionList)
+	router.GET("/section/:id", getSectionById)
 	router.POST("/section", postSection)
 	router.GET("/albums/:id", getDeviceById)
 	router.GET("/files/*fileName", staticFileService)

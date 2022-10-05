@@ -77,3 +77,29 @@ func querySectionList() []Section {
 
 	return sectionList
 }
+
+// get section by id
+func getSectionById(c *gin.Context) {
+	id := c.Param("id")
+	succ, section := querySectionById(id)
+	if succ {
+		c.IndentedJSON(http.StatusOK, section)
+	} else {
+		c.IndentedJSON(http.StatusNotFound, gin.H{})
+	}
+}
+
+// query seciton detail from database by id
+func querySectionById(id string) (bool, Section) {
+	var section Section
+	if err := db.QueryRow(
+		"select id, name, base_dir from section where id = ?", id).
+		Scan(
+			&section.ID,
+			&section.Name,
+			&section.BaseDir); err != nil {
+		_ = fmt.Errorf("query failed %v", err)
+		return false, section
+	}
+	return true, section
+}
