@@ -39,7 +39,7 @@ func initDB() {
 		User:   "root",
 		Passwd: "303606",
 		Addr:   "localhost:3306",
-		DBName: "wvp",
+		DBName: "2k",
 	}
 
 	var err error
@@ -132,6 +132,8 @@ func main() {
 	// getDevice()
 	router := gin.Default()
 	router.GET("/albums", getDevices)
+	router.GET("/section", getSectionList)
+	router.POST("/section", postSection)
 	router.GET("/albums/:id", getDeviceById)
 	router.GET("/files/*fileName", staticFileService)
 
