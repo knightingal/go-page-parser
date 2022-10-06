@@ -3,6 +3,7 @@ package main
 import (
 	"database/sql"
 	"fmt"
+	"knightingal/section"
 	"log"
 	"net/http"
 	"os"
@@ -128,13 +129,14 @@ func staticFileService(c *gin.Context) {
 
 func main() {
 	initDB()
-	initDB2()
+	// initDB2()
+	section.Init(db)
 	// getDevice()
 	router := gin.Default()
 	router.GET("/albums", getDevices)
-	router.GET("/section", getSectionList)
-	router.GET("/section/:id", getSectionById)
-	router.POST("/section", postSection)
+	router.GET("/section", section.GetSectionList)
+	router.GET("/section/:id", section.GetSectionById)
+	router.POST("/section", section.PostSection)
 	router.GET("/albums/:id", getDeviceById)
 	router.GET("/files/*fileName", staticFileService)
 

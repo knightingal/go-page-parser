@@ -1,6 +1,7 @@
-package main
+package section
 
 import (
+	"database/sql"
 	"fmt"
 	"net/http"
 	"strings"
@@ -9,18 +10,24 @@ import (
 	"github.com/google/uuid"
 )
 
+var db *sql.DB
+
+func Init(dbParam *sql.DB) {
+	db = dbParam
+}
+
 type Section struct {
 	ID      string `json:"id"`
 	Name    string `json:"name"`
 	BaseDir string `json:"baseDir"`
 }
 
-func getSectionList(c *gin.Context) {
+func GetSectionList(c *gin.Context) {
 	var d = querySectionList()
 	c.IndentedJSON(http.StatusOK, d)
 }
 
-func postSection(c *gin.Context) {
+func PostSection(c *gin.Context) {
 	var section Section
 
 	// Call BindJSON to bind the received JSON to
@@ -79,7 +86,7 @@ func querySectionList() []Section {
 }
 
 // get section by id
-func getSectionById(c *gin.Context) {
+func GetSectionById(c *gin.Context) {
 	id := c.Param("id")
 	succ, section := querySectionById(id)
 	if succ {
