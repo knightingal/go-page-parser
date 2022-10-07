@@ -9,6 +9,7 @@ import (
 	"os"
 	"path/filepath"
 
+	"github.com/PuerkitoBio/goquery"
 	"github.com/gin-gonic/gin"
 	"github.com/go-sql-driver/mysql"
 )
@@ -127,7 +128,7 @@ func staticFileService(c *gin.Context) {
 	c.File(target)
 }
 
-func main() {
+func main1() {
 	initDB()
 	// initDB2()
 	section.Init(db)
@@ -141,4 +142,21 @@ func main() {
 	router.GET("/files/*fileName", staticFileService)
 
 	router.Run("0.0.0.0:8080")
+}
+
+func main() {
+	file, err := os.Open("C:\\Users\\knightingal\\source\\go_code\\web-service-gin\\index.html")
+	if err != nil {
+		fmt.Printf(err.Error())
+	}
+
+	doc, err := goquery.NewDocumentFromReader(file)
+	if err != nil {
+		fmt.Printf(err.Error())
+	}
+
+	doc.Find("#div1> p").Each(func(i int, s *goquery.Selection) {
+		text := s.Text()
+		fmt.Println(text)
+	})
 }
