@@ -6,8 +6,10 @@ import (
 	"knightingal/section"
 	"log"
 	"net/http"
+	"net/url"
 	"os"
 	"path/filepath"
+	"strings"
 
 	"github.com/PuerkitoBio/goquery"
 	"github.com/gin-gonic/gin"
@@ -145,7 +147,7 @@ func main1() {
 }
 
 func main() {
-	file, err := os.Open("C:\\Users\\knightingal\\source\\go_code\\web-service-gin\\index.html")
+	file, err := os.Open("C:\\Users\\knightingal\\source\\go_code\\web-service-gin\\index2.html")
 	if err != nil {
 		fmt.Printf(err.Error())
 	}
@@ -155,8 +157,12 @@ func main() {
 		fmt.Printf(err.Error())
 	}
 
-	doc.Find("#div1> p").Each(func(i int, s *goquery.Selection) {
-		text := s.Text()
-		fmt.Println(text)
+	doc.Find("img").Each(func(i int, s *goquery.Selection) {
+		// text := s.Text()
+		src, _ := s.Attr("src")
+		escape, _ := url.QueryUnescape(src)
+		escape = strings.ReplaceAll(escape, "|", "")
+
+		fmt.Println(escape)
 	})
 }
