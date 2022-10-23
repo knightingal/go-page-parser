@@ -157,8 +157,7 @@ func main() {
 		fmt.Printf(err.Error())
 	}
 
-	doc.Find("img").Each(func(i int, s *goquery.Selection) {
-		// text := s.Text()
+	doc.Find(".f14 > img").Each(func(i int, s *goquery.Selection) {
 		src, _ := s.Attr("src")
 		escape, _ := url.QueryUnescape(src)
 		escape = strings.ReplaceAll(escape, "|", "")
