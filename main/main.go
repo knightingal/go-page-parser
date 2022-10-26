@@ -3,6 +3,7 @@ package main
 import (
 	"database/sql"
 	"fmt"
+	"io/fs"
 	"knightingal/section"
 	"log"
 	"net/http"
@@ -164,4 +165,60 @@ func main() {
 
 		fmt.Println(escape)
 	})
+
+	dir := os.DirFS("C:\\Users\\knightingal\\source\\go_code\\web-service-gin")
+
+	dirEntityList, err := fs.ReadDir(dir, ".")
+
+	dirNames := make([]string, 0)
+	for _, dir := range dirEntityList {
+		// fmt.Println(dir.Name())
+		dirNames = append(dirNames, dir.Name())
+	}
+	fmt.Println(dirNames)
+
+	cb := func(src string) (string, bool) {
+
+		filterRet := filter(&dirNames, func(dirName string) bool {
+			return strings.Contains(dirName, src)
+		})
+
+		if len(*filterRet) == 1 {
+			fmt.Println((*filterRet)[0])
+			return (*filterRet)[0], true
+		}
+
+		return "", false
+	}
+	const srcString = "2222index22.html11111"
+	windowString(srcString, cb)
+
+}
+
+func windowString(src string, process func(string) (string, bool)) {
+	srcArray := []rune(src)
+	size := len(srcArray)
+	stop := false
+	for i := 0; i < size; i++ {
+		for j := 0; j < size-i; j++ {
+			sub1 := srcArray[j : size-i]
+			_, stop = process(string(sub1))
+			if stop {
+				break
+			}
+		}
+		if stop {
+			break
+		}
+	}
+}
+
+func filter[T any](src *[]T, fn func(T) bool) *[]T {
+	ret := make([]T, 0)
+	for _, item := range *src {
+		if fn(item) {
+			ret = append(ret, item)
+		}
+	}
+	return &ret
 }
