@@ -200,8 +200,9 @@ func windowString(src string, process func(string) (string, bool)) {
 	size := len(srcArray)
 	stop := false
 	for i := 0; i < size; i++ {
-		for j := 0; j < size-i; j++ {
-			sub1 := srcArray[j : size-i]
+		for j := 0; j <= i; j++ {
+			sub1 := srcArray[j : j+size-i]
+			fmt.Println(string(sub1))
 			_, stop = process(string(sub1))
 			if stop {
 				break
