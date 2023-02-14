@@ -147,7 +147,7 @@ func main1() {
 	router.Run("0.0.0.0:8080")
 }
 
-func main() {
+func main2() {
 	file, err := os.Open("C:\\Users\\knightingal\\source\\go_code\\web-service-gin\\index2.html")
 	if err != nil {
 		fmt.Printf(err.Error())
