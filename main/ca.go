@@ -18,7 +18,7 @@ import (
 	"time"
 )
 
-func main() {
+func main2() {
 	// get our ca and server certificate
 	serverTLSConf, clientTLSConf, err := certsetup()
 	if err != nil {

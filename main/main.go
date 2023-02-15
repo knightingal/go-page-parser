@@ -147,8 +147,9 @@ func main1() {
 	router.Run("0.0.0.0:8080")
 }
 
-func main2() {
-	file, err := os.Open("C:\\Users\\knightingal\\source\\go_code\\web-service-gin\\index2.html")
+func main() {
+	// file, err := os.Open("/mnt/2048/CLImages2/[西川康] お嬢様は戀話がお好き.html")
+	file, err := os.Open("/mnt/download/輝夜姬想讓人告白_天才們的戀愛頭腦戰_ 早坂愛 2.html")
 	if err != nil {
 		fmt.Printf(err.Error())
 	}
@@ -158,22 +159,31 @@ func main2() {
 		fmt.Printf(err.Error())
 	}
 
-	doc.Find(".f14 > img").Each(func(i int, s *goquery.Selection) {
-		src, _ := s.Attr("src")
-		escape, _ := url.QueryUnescape(src)
-		escape = strings.ReplaceAll(escape, "|", "")
+	var src string
 
-		fmt.Println(escape)
+	doc.Find(".tpc_content").Each(func(i int, s *goquery.Selection) {
+		s.Find("img").Each(func(i int, s *goquery.Selection) {
+			src, _ = s.Attr("src")
+			escape, _ := url.QueryUnescape(src)
+
+			fmt.Println(escape)
+			src = escape
+		})
 	})
 
-	dir := os.DirFS("C:\\Users\\knightingal\\source\\go_code\\web-service-gin")
+	srcDirList := strings.Split(src, "/")
+	srcDir := srcDirList[len(srcDirList)-2]
 
-	dirEntityList, err := fs.ReadDir(dir, ".")
+	// dir := os.DirFS("/mnt/2048/CLImages2/")
+	dir := os.DirFS("/mnt/download/")
+
+	dirEntityList, _ := fs.ReadDir(dir, ".")
 
 	dirNames := make([]string, 0)
 	for _, dir := range dirEntityList {
-		// fmt.Println(dir.Name())
-		dirNames = append(dirNames, dir.Name())
+		if dir.IsDir() {
+			dirNames = append(dirNames, dir.Name())
+		}
 	}
 	fmt.Println(dirNames)
 
@@ -184,15 +194,14 @@ func main2() {
 		})
 
 		if len(*filterRet) == 1 {
+			fmt.Println("====matched====")
 			fmt.Println((*filterRet)[0])
 			return (*filterRet)[0], true
 		}
 
 		return "", false
 	}
-	const srcString = "2222index22.html11111"
-	windowString(srcString, cb)
-
+	windowString(srcDir, cb)
 }
 
 func windowString(src string, process func(string) (string, bool)) {
