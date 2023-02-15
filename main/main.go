@@ -3,6 +3,7 @@ package main
 import (
 	"database/sql"
 	"fmt"
+	"io"
 	"io/fs"
 	"knightingal/section"
 	"log"
@@ -147,9 +148,12 @@ func main1() {
 	router.Run("0.0.0.0:8080")
 }
 
+const BASE_DIR = "/mnt/download/"
+const TARGET_DIR = "/mnt/linux1000/1024/"
+
 func main() {
 	// file, err := os.Open("/mnt/2048/CLImages2/[西川康] お嬢様は戀話がお好き.html")
-	file, err := os.Open("/mnt/download/輝夜姬想讓人告白_天才們的戀愛頭腦戰_ 早坂愛 2.html")
+	file, err := os.Open(BASE_DIR + "輝夜姬想讓人告白_天才們的戀愛頭腦戰_ 早坂愛 2.html")
 	if err != nil {
 		fmt.Printf(err.Error())
 	}
@@ -160,6 +164,9 @@ func main() {
 	}
 
 	var src string
+	var srcDir string
+
+	imgSrcList := make([]string, 0)
 
 	doc.Find(".tpc_content").Each(func(i int, s *goquery.Selection) {
 		s.Find("img").Each(func(i int, s *goquery.Selection) {
@@ -167,15 +174,14 @@ func main() {
 			escape, _ := url.QueryUnescape(src)
 
 			fmt.Println(escape)
-			src = escape
+			srcDirList := strings.Split(escape, "/")
+			srcDir = srcDirList[len(srcDirList)-2]
+			src = srcDirList[len(srcDirList)-1]
+			imgSrcList = append(imgSrcList, src)
 		})
 	})
 
-	srcDirList := strings.Split(src, "/")
-	srcDir := srcDirList[len(srcDirList)-2]
-
-	// dir := os.DirFS("/mnt/2048/CLImages2/")
-	dir := os.DirFS("/mnt/download/")
+	dir := os.DirFS(BASE_DIR)
 
 	dirEntityList, _ := fs.ReadDir(dir, ".")
 
@@ -201,10 +207,23 @@ func main() {
 
 		return "", false
 	}
-	windowString(srcDir, cb)
+	realDir, succ := windowString(srcDir, cb)
+	if !succ {
+		return
+	}
+	fmt.Println(realDir)
+
+	os.Mkdir(TARGET_DIR+realDir, 0750)
+	for _, imgSrc := range imgSrcList {
+		targetFile, _ := os.Create(TARGET_DIR + realDir + "/" + imgSrc)
+		srcFile, _ := os.Open(BASE_DIR + realDir + "/" + imgSrc)
+		io.Copy(targetFile, srcFile)
+
+	}
+
 }
 
-func windowString(src string, process func(string) (string, bool)) {
+func windowString(src string, process func(string) (string, bool)) (string, bool) {
 	srcArray := []rune(src)
 	size := len(srcArray)
 	stop := false
@@ -212,15 +231,16 @@ func windowString(src string, process func(string) (string, bool)) {
 		for j := 0; j <= i; j++ {
 			sub1 := srcArray[j : j+size-i]
 			fmt.Println(string(sub1))
-			_, stop = process(string(sub1))
+			realDir, stop := process(string(sub1))
 			if stop {
-				break
+				return realDir, true
 			}
 		}
 		if stop {
 			break
 		}
 	}
+	return "", false
 }
 
 func filter[T any](src *[]T, fn func(T) bool) *[]T {
