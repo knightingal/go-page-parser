@@ -153,34 +153,29 @@ const TARGET_DIR = "/mnt/linux1000/1024/"
 
 func main() {
 	// file, err := os.Open("/mnt/2048/CLImages2/[西川康] お嬢様は戀話がお好き.html")
-	file, err := os.Open(BASE_DIR + "輝夜姬想讓人告白_天才們的戀愛頭腦戰_ 早坂愛 2.html")
-	if err != nil {
-		fmt.Printf(err.Error())
+	imgSrcList, srcDir := parseDoc("輝夜姬想讓人告白_天才們的戀愛頭腦戰_ 早坂愛 2.html")
+
+	realDir, succ := matchDirName(srcDir)
+
+	if !succ {
+		return
 	}
+	fmt.Println(realDir)
+	cpFiles(imgSrcList, realDir)
 
-	doc, err := goquery.NewDocumentFromReader(file)
-	if err != nil {
-		fmt.Printf(err.Error())
+}
+
+func cpFiles(imgSrcList []string, realDirName string) {
+	os.Mkdir(TARGET_DIR+realDirName, 0750)
+	for _, imgSrc := range imgSrcList {
+		targetFile, _ := os.Create(TARGET_DIR + realDirName + "/" + imgSrc)
+		srcFile, _ := os.Open(BASE_DIR + realDirName + "/" + imgSrc)
+		io.Copy(targetFile, srcFile)
 	}
+}
 
-	var src string
-	var srcDir string
-
-	imgSrcList := make([]string, 0)
-
-	doc.Find(".tpc_content").Each(func(i int, s *goquery.Selection) {
-		s.Find("img").Each(func(i int, s *goquery.Selection) {
-			src, _ = s.Attr("src")
-			escape, _ := url.QueryUnescape(src)
-
-			fmt.Println(escape)
-			srcDirList := strings.Split(escape, "/")
-			srcDir = srcDirList[len(srcDirList)-2]
-			src = srcDirList[len(srcDirList)-1]
-			imgSrcList = append(imgSrcList, src)
-		})
-	})
-
+// match exist dir with a given dir name parse from html file
+func matchDirName(srcDir string) (matchDirName string, succ bool) {
 	dir := os.DirFS(BASE_DIR)
 
 	dirEntityList, _ := fs.ReadDir(dir, ".")
@@ -207,19 +202,41 @@ func main() {
 
 		return "", false
 	}
-	realDir, succ := windowString(srcDir, cb)
-	if !succ {
+	matchDirName, succ = windowString(srcDir, cb)
+	return
+
+}
+
+// parse doc from a given html file path
+func parseDoc(docPath string) (imgSrcList []string, srcDir string) {
+	file, err := os.Open(BASE_DIR + docPath)
+	if err != nil {
+		fmt.Printf(err.Error())
 		return
 	}
-	fmt.Println(realDir)
 
-	os.Mkdir(TARGET_DIR+realDir, 0750)
-	for _, imgSrc := range imgSrcList {
-		targetFile, _ := os.Create(TARGET_DIR + realDir + "/" + imgSrc)
-		srcFile, _ := os.Open(BASE_DIR + realDir + "/" + imgSrc)
-		io.Copy(targetFile, srcFile)
-
+	doc, err := goquery.NewDocumentFromReader(file)
+	if err != nil {
+		fmt.Printf(err.Error())
+		return
 	}
+	defer file.Close()
+
+	imgSrcList = make([]string, 0)
+
+	doc.Find(".tpc_content").Each(func(i int, s *goquery.Selection) {
+		s.Find("img").Each(func(i int, s *goquery.Selection) {
+			src, _ := s.Attr("src")
+			escape, _ := url.QueryUnescape(src)
+
+			fmt.Println(escape)
+			srcDirList := strings.Split(escape, "/")
+			srcDir = srcDirList[len(srcDirList)-2]
+			imgName := srcDirList[len(srcDirList)-1]
+			imgSrcList = append(imgSrcList, imgName)
+		})
+	})
+	return
 
 }
 
