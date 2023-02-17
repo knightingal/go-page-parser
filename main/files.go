@@ -39,6 +39,8 @@ func cpFiles(imgSrcList []string, realDirName string) Section {
 		image := Image{}
 		image.name = imgSrc
 		imgList = append(imgList, image)
+		srcFile.Close()
+		targetFile.Close()
 	}
 	section.imgList = imgList
 
