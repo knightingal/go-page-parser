@@ -2,11 +2,14 @@ package main
 
 import (
 	"fmt"
+	"image"
+	_ "image/jpeg"
 	"io"
 	"io/fs"
 	"net/url"
 	"os"
 	"strings"
+	"time"
 
 	"github.com/PuerkitoBio/goquery"
 )
@@ -14,13 +17,33 @@ import (
 const BASE_DIR = "/mnt/download/"
 const TARGET_DIR = "/mnt/linux1000/1024/"
 
-func cpFiles(imgSrcList []string, realDirName string) {
-	os.Mkdir(TARGET_DIR+realDirName, 0750)
+func generateTargetFullPath(dirName string, imgName string) string {
+	return TARGET_DIR + dirName + "/" + imgName
+}
+
+func cpFiles(imgSrcList []string, realDirName string) Section {
+	now := time.Now()
+	stamp := now.Format("20060102150405")
+
+	section := Section{}
+	section.timeStamp = stamp
+	section.name = stamp + realDirName
+
+	imgList := make([]Image, 0)
+
+	os.Mkdir(TARGET_DIR+section.name, 0750)
 	for _, imgSrc := range imgSrcList {
-		targetFile, _ := os.Create(TARGET_DIR + realDirName + "/" + imgSrc)
+		targetFile, _ := os.Create(generateTargetFullPath(section.name, imgSrc))
 		srcFile, _ := os.Open(BASE_DIR + realDirName + "/" + imgSrc)
 		io.Copy(targetFile, srcFile)
+		image := Image{}
+		image.name = imgSrc
+		imgList = append(imgList, image)
 	}
+	section.imgList = imgList
+
+	return section
+
 }
 
 // match exist dir with a given dir name parse from html file
@@ -117,4 +140,29 @@ func filter[T any](src *[]T, fn func(T) bool) *[]T {
 		}
 	}
 	return &ret
+}
+
+func parseImage(section Section) Section {
+
+	for i, imgSt := range section.imgList {
+		imgReader, _ := os.Open(generateTargetFullPath(section.name, imgSt.name))
+		img, _, err := image.Decode(imgReader)
+		if err != nil {
+			return section
+		}
+
+		x := img.Bounds().Dx()
+		y := img.Bounds().Dy()
+
+		imgSt.height = y
+		imgSt.width = x
+
+		section.imgList[i] = imgSt
+
+	}
+	section.album = "1024"
+	section.cover = section.imgList[0]
+
+	return section
+
 }

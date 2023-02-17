@@ -153,6 +153,28 @@ func main() {
 		return
 	}
 	fmt.Println(realDir)
-	cpFiles(imgSrcList, realDir)
+	section := cpFiles(imgSrcList, realDir)
 
+	section = parseImage(section)
+
+	initFlowDB()
+	sectoinId := insertSection(section)
+	for _, imgSt := range section.imgList {
+		insertImg(imgSt, sectoinId)
+	}
+
+}
+
+type Section struct {
+	timeStamp string
+	name      string
+	album     string
+	imgList   []Image
+	cover     Image
+}
+
+type Image struct {
+	height int
+	width  int
+	name   string
 }
