@@ -3,17 +3,38 @@ package main
 import (
 	"database/sql"
 	"fmt"
+	"log"
 )
 
 var db *sql.DB
 
 func main() {
+	initFlowDB()
 	// file, err := os.Open("/mnt/2048/CLImages2/[西川康] お嬢様は戀話がお好き.html")
-	imgSrcList, srcDir := parseDoc("輝夜姬想讓人告白_天才們的戀愛頭腦戰_ 早坂愛 2.html")
+	fileNames := scanWebFile()
+
+	for _, fileName := range fileNames {
+		process1024Web(fileName)
+		// log.Println("file", fileName)
+
+	}
+
+}
+
+func process1024Web(fileName string) {
+	log.Println("process1024Web", fileName)
+	insertLog(fileName, "")
+	imgSrcList, srcDir := parseDoc(fileName)
+	if len(imgSrcList) == 0 {
+		updateLog(fileName, "img not found")
+		return
+
+	}
 
 	realDir, succ := matchDirName(srcDir)
 
 	if !succ {
+		updateLog(fileName, "dir not found")
 		return
 	}
 	fmt.Println(realDir)
@@ -21,11 +42,11 @@ func main() {
 
 	section = parseImage(section)
 
-	initFlowDB()
 	sectoinId := insertSection(section)
 	for _, imgSt := range section.imgList {
 		insertImg(imgSt, sectoinId)
 	}
+	updateLog(fileName, "succ")
 
 }
 

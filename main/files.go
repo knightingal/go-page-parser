@@ -45,6 +45,19 @@ func cpFiles(imgSrcList []string, realDirName string) Section {
 	section.imgList = imgList
 
 	return section
+}
+
+func scanWebFile() []string {
+	dir := os.DirFS(BASE_DIR)
+	dirEntityList, _ := fs.ReadDir(dir, ".")
+	fileNames := make([]string, 0)
+	for _, file := range dirEntityList {
+		if strings.HasSuffix(file.Name(), ".html") {
+			fileNames = append(fileNames, file.Name())
+		}
+	}
+
+	return fileNames
 
 }
 

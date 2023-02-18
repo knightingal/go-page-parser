@@ -50,6 +50,21 @@ func insertSection(section Section) int64 {
 
 }
 
+func insertLog(fileName string, msg string) {
+	_, error := db.Exec("insert into flow1000log(file_name, msg) values (?,?)", fileName, msg)
+	if error != nil {
+		log.Fatal(error)
+	}
+}
+
+func updateLog(fileName string, msg string) {
+	_, error := db.Exec("update flow1000log set msg = ? where file_name = ?", msg, fileName)
+	if error != nil {
+		log.Fatal(error)
+	}
+
+}
+
 func insertImg(image Image, sectionId int64) {
 	result, error := db.Exec("insert into flow1000img("+
 		"name, height, width, in_cover, section_id"+
