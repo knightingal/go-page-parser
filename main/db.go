@@ -57,6 +57,18 @@ func insertLog(fileName string, msg string) {
 	}
 }
 
+func updateComment(fileName string, comment string) {
+	r := db.QueryRow("select comment from flow1000log where file_name = ?", fileName)
+	existComment := ""
+	r.Scan(&existComment)
+	existComment = existComment + "," + comment
+	ret, error := db.Exec("update flow1000log set comment = ? where file_name = ?", existComment, fileName)
+	if error != nil {
+		log.Fatal(error)
+	}
+	log.Println(ret)
+}
+
 func updateLog(fileName string, msg string) {
 	_, error := db.Exec("update flow1000log set msg = ? where file_name = ?", msg, fileName)
 	if error != nil {

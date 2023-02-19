@@ -3,9 +3,12 @@ package main
 import (
 	"fmt"
 	"image"
+	_ "image/gif"
 	_ "image/jpeg"
+	_ "image/png"
 	"io"
 	"io/fs"
+	"log"
 	"net/url"
 	"os"
 	"strings"
@@ -21,7 +24,7 @@ func generateTargetFullPath(dirName string, imgName string) string {
 	return TARGET_DIR + dirName + "/" + imgName
 }
 
-func cpFiles(imgSrcList []string, realDirName string) Section {
+func cpFiles(imgSrcList []string, realDirName string, docPath string) Section {
 	now := time.Now()
 	stamp := now.Format("20060102150405")
 
@@ -34,7 +37,17 @@ func cpFiles(imgSrcList []string, realDirName string) Section {
 	os.Mkdir(TARGET_DIR+section.name, 0750)
 	for _, imgSrc := range imgSrcList {
 		targetFile, _ := os.Create(generateTargetFullPath(section.name, imgSrc))
-		srcFile, _ := os.Open(BASE_DIR + realDirName + "/" + imgSrc)
+		srcFile, err := os.Open(BASE_DIR + realDirName + "/" + imgSrc)
+		if err != nil {
+			if os.IsNotExist(err) {
+				msg := imgSrc + " not exist"
+				msgChan <- BatchComment{docPath, msg}
+
+				log.Println(err)
+				continue
+
+			}
+		}
 		io.Copy(targetFile, srcFile)
 		image := Image{}
 		image.name = imgSrc
@@ -111,7 +124,7 @@ func parseDoc(docPath string) (imgSrcList []string, srcDir string) {
 
 	imgSrcList = make([]string, 0)
 
-	doc.Find(".tpc_content").Each(func(i int, s *goquery.Selection) {
+	doc.Find(".att_img").Each(func(i int, s *goquery.Selection) {
 		s.Find("img").Each(func(i int, s *goquery.Selection) {
 			src, _ := s.Attr("src")
 			escape, _ := url.QueryUnescape(src)
@@ -157,13 +170,14 @@ func filter[T any](src *[]T, fn func(T) bool) *[]T {
 	return &ret
 }
 
-func parseImage(section Section) Section {
+func parseImage(section Section) (Section, error) {
 
 	for i, imgSt := range section.imgList {
 		imgReader, _ := os.Open(generateTargetFullPath(section.name, imgSt.name))
 		img, _, err := image.Decode(imgReader)
 		if err != nil {
-			return section
+
+			return section, err
 		}
 
 		x := img.Bounds().Dx()
@@ -178,6 +192,6 @@ func parseImage(section Section) Section {
 	section.album = "1024"
 	section.cover = section.imgList[0]
 
-	return section
+	return section, nil
 
 }
