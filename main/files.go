@@ -31,6 +31,7 @@ func cpFiles(imgSrcList []string, realDirName string, docPath string) Section {
 	section := Section{}
 	section.timeStamp = stamp
 	section.name = stamp + realDirName
+	section.webName = docPath
 
 	imgList := make([]Image, 0)
 
@@ -124,7 +125,7 @@ func parseDoc(docPath string) (imgSrcList []string, srcDir string) {
 
 	imgSrcList = make([]string, 0)
 
-	doc.Find(".att_img").Each(func(i int, s *goquery.Selection) {
+	doc.Find(".tpc_content").Each(func(i int, s *goquery.Selection) {
 		s.Find("img").Each(func(i int, s *goquery.Selection) {
 			src, _ := s.Attr("src")
 			escape, _ := url.QueryUnescape(src)
@@ -176,8 +177,9 @@ func parseImage(section Section) (Section, error) {
 		imgReader, _ := os.Open(generateTargetFullPath(section.name, imgSt.name))
 		img, _, err := image.Decode(imgReader)
 		if err != nil {
+			msgChan <- BatchComment{section.webName, imgSt.name + ":" + err.Error()}
 
-			return section, err
+			continue
 		}
 
 		x := img.Bounds().Dx()
@@ -189,7 +191,7 @@ func parseImage(section Section) (Section, error) {
 		section.imgList[i] = imgSt
 
 	}
-	section.album = "1024"
+	section.album = "1804"
 	section.cover = section.imgList[0]
 
 	return section, nil

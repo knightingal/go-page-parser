@@ -34,6 +34,12 @@ func main() {
 
 func process1024Web(fileName string) {
 	log.Println("process1024Web", fileName)
+
+	if checkSuccLog(fileName) {
+		log.Println(fileName, "succ")
+		return
+	}
+
 	insertLog(fileName, "")
 	imgSrcList, srcDir := parseDoc(fileName)
 	if len(imgSrcList) == 0 {
@@ -69,6 +75,7 @@ type Section struct {
 	album     string
 	imgList   []Image
 	cover     Image
+	webName   string
 }
 
 type Image struct {

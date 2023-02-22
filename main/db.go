@@ -74,7 +74,13 @@ func updateLog(fileName string, msg string) {
 	if error != nil {
 		log.Fatal(error)
 	}
+}
 
+func checkSuccLog(fileName string) bool {
+	r := db.QueryRow("select count(file_name) from flow1000log where file_name = ? and msg = 'succ'", fileName)
+	var count int
+	r.Scan(&count)
+	return count > 0
 }
 
 func insertImg(image Image, sectionId int64) {
