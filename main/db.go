@@ -83,6 +83,13 @@ func checkSuccLog(fileName string) bool {
 	return count > 0
 }
 
+func checkExistLog(fileName string) bool {
+	r := db.QueryRow("select count(file_name) from flow1000log where file_name = ? ", fileName)
+	var count int
+	r.Scan(&count)
+	return count > 0
+}
+
 func insertImg(image Image, sectionId int64) {
 	result, error := db.Exec("insert into flow1000img("+
 		"name, height, width, in_cover, section_id"+

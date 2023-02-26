@@ -39,8 +39,10 @@ func process1024Web(fileName string) {
 		log.Println(fileName, "succ")
 		return
 	}
+	if !checkExistLog(fileName) {
+		insertLog(fileName, "")
+	}
 
-	insertLog(fileName, "")
 	imgSrcList, srcDir := parseDoc(fileName)
 	if len(imgSrcList) == 0 {
 		updateLog(fileName, "img not found")
