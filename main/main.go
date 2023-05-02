@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"fmt"
 	"log"
+	"os"
 )
 
 var db *sql.DB
@@ -27,32 +28,21 @@ func main() {
 	fileNames := scanWebFile()
 
 	for _, fileName := range fileNames {
-		process1024Web(fileName)
+		process1024Web(fileName, persistenceDir)
 	}
+	// process1024Web("[修复][動漫] [Bird Forest (梟森)] 1RTで仲悪いノンケ女子たちが1秒キスするシリーズ-付き合ってください! [中国翻訳][34P] - 新時代的我們 草榴社區 - cl.tfrw.xyz.html", persistenceDir)
 
 }
 
-func process1024Web(fileName string) {
-	log.Println("process1024Web", fileName)
+func bakDir(realDir, fileName string) {
+	os.Rename(BASE_DIR+realDir, BAK_DIR+realDir)
+	os.Rename(BASE_DIR+fileName, BAK_DIR+fileName)
+}
 
-	if checkSuccLog(fileName) {
-		log.Println(fileName, "succ")
-		return
-	}
-	if !checkExistLog(fileName) {
-		insertLog(fileName, "")
-	}
-
-	imgSrcList, srcDir := parseDoc(fileName)
+func persistenceDir(realDir, fileName string) {
+	imgSrcList, _ := parseDoc(fileName)
 	if len(imgSrcList) == 0 {
 		updateLog(fileName, "img not found")
-		return
-	}
-
-	realDir, succ := matchDirName(srcDir)
-
-	if !succ {
-		updateLog(fileName, "dir not found")
 		return
 	}
 	fmt.Println(realDir)
@@ -68,7 +58,29 @@ func process1024Web(fileName string) {
 		insertImg(imgSt, sectoinId)
 	}
 	updateLog(fileName, "succ")
+}
 
+func process1024Web(fileName string, dirProcessor func(string, string)) {
+	log.Println("process1024Web", fileName)
+
+	if checkSuccLog(fileName) {
+		log.Println(fileName, "succ")
+		return
+	}
+	if !checkExistLog(fileName) {
+		insertLog(fileName, "")
+	}
+
+	_, srcDir := parseDoc(fileName)
+
+	realDir, succ := matchDirName(srcDir)
+
+	if !succ {
+		updateLog(fileName, "dir not found")
+		return
+	}
+
+	dirProcessor(realDir, fileName)
 }
 
 type Section struct {

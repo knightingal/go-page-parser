@@ -15,10 +15,12 @@ import (
 	"time"
 
 	"github.com/PuerkitoBio/goquery"
+	_ "golang.org/x/image/webp"
 )
 
-const BASE_DIR = "/mnt/download/"
-const TARGET_DIR = "/mnt/linux1000/1024/"
+const BASE_DIR = "/mnt/2048/CLImages/"
+const TARGET_DIR = "/mnt/linux1000/1805/"
+const BAK_DIR = "/mnt/bak/2048/"
 
 func generateTargetFullPath(dirName string, imgName string) string {
 	return TARGET_DIR + dirName + "/" + imgName
@@ -66,7 +68,7 @@ func scanWebFile() []string {
 	dirEntityList, _ := fs.ReadDir(dir, ".")
 	fileNames := make([]string, 0)
 	for _, file := range dirEntityList {
-		if strings.HasSuffix(file.Name(), ".html") {
+		if strings.HasSuffix(file.Name(), ".html") && strings.HasPrefix(file.Name(), "[修复]") {
 			fileNames = append(fileNames, file.Name())
 		}
 	}
@@ -132,6 +134,9 @@ func parseDoc(docPath string) (imgSrcList []string, srcDir string) {
 
 			fmt.Println(escape)
 			srcDirList := strings.Split(escape, "/")
+			if len(srcDirList) < 2 {
+				return
+			}
 			srcDir = srcDirList[len(srcDirList)-2]
 			imgName := srcDirList[len(srcDirList)-1]
 			imgSrcList = append(imgSrcList, imgName)
@@ -191,7 +196,7 @@ func parseImage(section Section) (Section, error) {
 		section.imgList[i] = imgSt
 
 	}
-	section.album = "1804"
+	section.album = "1805"
 	section.cover = section.imgList[0]
 
 	return section, nil
