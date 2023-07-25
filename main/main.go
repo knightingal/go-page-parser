@@ -35,8 +35,8 @@ func main() {
 }
 
 func bakDir(realDir, fileName string) {
-	os.Rename(BASE_DIR+realDir, BAK_DIR+realDir)
-	os.Rename(BASE_DIR+fileName, BAK_DIR+fileName)
+	os.Rename(SOURCE_DIR+realDir, BAK_DIR+realDir)
+	os.Rename(SOURCE_DIR+fileName, BAK_DIR+fileName)
 }
 
 func persistenceDir(realDir, fileName string) {

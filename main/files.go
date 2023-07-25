@@ -18,7 +18,7 @@ import (
 	_ "golang.org/x/image/webp"
 )
 
-const BASE_DIR = "/mnt/2048/CLImages/"
+const SOURCE_DIR = "/mnt/2048/CLImages/"
 const TARGET_DIR = "/mnt/linux1000/1805/"
 const BAK_DIR = "/mnt/bak/2048/"
 
@@ -40,7 +40,7 @@ func cpFiles(imgSrcList []string, realDirName string, docPath string) Section {
 	os.Mkdir(TARGET_DIR+section.name, 0750)
 	for _, imgSrc := range imgSrcList {
 		targetFile, _ := os.Create(generateTargetFullPath(section.name, imgSrc))
-		srcFile, err := os.Open(BASE_DIR + realDirName + "/" + imgSrc)
+		srcFile, err := os.Open(SOURCE_DIR + realDirName + "/" + imgSrc)
 		if err != nil {
 			if os.IsNotExist(err) {
 				msg := imgSrc + " not exist"
@@ -64,7 +64,7 @@ func cpFiles(imgSrcList []string, realDirName string, docPath string) Section {
 }
 
 func scanWebFile() []string {
-	dir := os.DirFS(BASE_DIR)
+	dir := os.DirFS(SOURCE_DIR)
 	dirEntityList, _ := fs.ReadDir(dir, ".")
 	fileNames := make([]string, 0)
 	for _, file := range dirEntityList {
@@ -79,7 +79,7 @@ func scanWebFile() []string {
 
 // match exist dir with a given dir name parse from html file
 func matchDirName(srcDir string) (matchDirName string, succ bool) {
-	dir := os.DirFS(BASE_DIR)
+	dir := os.DirFS(SOURCE_DIR)
 
 	dirEntityList, _ := fs.ReadDir(dir, ".")
 
@@ -112,7 +112,7 @@ func matchDirName(srcDir string) (matchDirName string, succ bool) {
 
 // parse doc from a given html file path
 func parseDoc(docPath string) (imgSrcList []string, srcDir string) {
-	file, err := os.Open(BASE_DIR + docPath)
+	file, err := os.Open(SOURCE_DIR + docPath)
 	if err != nil {
 		fmt.Print(err.Error())
 		return
