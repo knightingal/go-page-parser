@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"path/filepath"
 	"strings"
 )
 
@@ -77,7 +78,7 @@ func process1024Web(fileName string, dirProcessor func(string, string)) {
 	}
 
 	// _, srcDir := parseDocV2(fileName)
-	srcDir := strings.Split(fileName, ".")[0]
+	srcDir := strings.TrimSuffix(fileName, filepath.Ext(fileName))
 
 	realDir, succ := matchDirName(srcDir)
 
@@ -90,12 +91,13 @@ func process1024Web(fileName string, dirProcessor func(string, string)) {
 }
 
 type Section struct {
-	timeStamp string
-	name      string
-	album     string
-	imgList   []Image
-	cover     Image
-	webName   string
+	timeStamp    string
+	name         string
+	album        string
+	imgList      []Image
+	cover        Image
+	webName      string
+	clientStatus string
 }
 
 type Image struct {

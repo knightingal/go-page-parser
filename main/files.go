@@ -19,11 +19,12 @@ import (
 )
 
 const SOURCE_DIR = "/mnt/2048/2048/CLImages/CLImages0828/"
-const TARGET_DIR = "/mnt/linux1000/1805/"
+const TARGET_DIR = "/mnt/linux1000/"
 const BAK_DIR = "/mnt/bak/2048/"
+const ALBUM = "1805"
 
 func generateTargetFullPath(dirName string, imgName string) string {
-	return TARGET_DIR + dirName + "/" + imgName
+	return TARGET_DIR + ALBUM + "/" + dirName + "/" + imgName
 }
 
 func cpFiles(imgSrcList []string, realDirName string, docPath string) Section {
@@ -34,10 +35,12 @@ func cpFiles(imgSrcList []string, realDirName string, docPath string) Section {
 	section.timeStamp = stamp
 	section.name = stamp + realDirName
 	section.webName = docPath
+	section.clientStatus = "NONE"
+	section.album = ALBUM
 
 	imgList := make([]Image, 0)
 
-	os.Mkdir(TARGET_DIR+section.name, 0750)
+	os.Mkdir(TARGET_DIR+ALBUM+"/"+section.name, 0750)
 	for _, imgSrc := range imgSrcList {
 		targetFile, _ := os.Create(generateTargetFullPath(section.name, imgSrc))
 		srcFile, err := os.Open(SOURCE_DIR + realDirName + "/" + imgSrc)
@@ -234,7 +237,6 @@ func parseImage(section Section) (Section, error) {
 		section.imgList[i] = imgSt
 
 	}
-	section.album = "1806"
 	section.cover = section.imgList[0]
 
 	return section, nil
