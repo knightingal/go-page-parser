@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"strings"
 )
 
 var db *sql.DB
@@ -43,7 +44,7 @@ func bakDir(realDir, fileName string) {
 }
 
 func persistenceDir(realDir, fileName string) {
-	imgSrcList, _ := parseDocV2(fileName)
+	imgSrcList := parseDocV2(fileName, realDir)
 	if len(imgSrcList) == 0 {
 		updateLog(fileName, "img not found")
 		return
@@ -75,7 +76,8 @@ func process1024Web(fileName string, dirProcessor func(string, string)) {
 		insertLog(fileName, "")
 	}
 
-	_, srcDir := parseDocV2(fileName)
+	// _, srcDir := parseDocV2(fileName)
+	srcDir := strings.Split(fileName, ".")[0]
 
 	realDir, succ := matchDirName(srcDir)
 

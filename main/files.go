@@ -145,7 +145,7 @@ func parseDoc(docPath string) (imgSrcList []string, srcDir string) {
 	return
 }
 
-func parseDocV2(docPath string) (imgSrcList []string, srcDir string) {
+func parseDocV2(docPath string, srcDir string) (imgSrcList []string) {
 	file, err := os.Open(SOURCE_DIR + docPath)
 	if err != nil {
 		fmt.Print(err.Error())
@@ -171,9 +171,14 @@ func parseDocV2(docPath string) (imgSrcList []string, srcDir string) {
 			if len(srcDirList) < 2 {
 				return
 			}
-			srcDir = srcDirList[len(srcDirList)-2]
 			imgName := srcDirList[len(srcDirList)-1]
-			imgSrcList = append(imgSrcList, imgName)
+			imageFile, err := os.Open(SOURCE_DIR + srcDir + "/" + imgName)
+			if err != nil && os.IsNotExist(err) {
+				log.Println(imgName + " not exist")
+			} else {
+				imageFile.Close()
+				imgSrcList = append(imgSrcList, imgName)
+			}
 		})
 	})
 	return
