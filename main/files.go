@@ -18,8 +18,8 @@ import (
 	_ "golang.org/x/image/webp"
 )
 
-const BASE_DIR = "/mnt/2048/CLImages/"
-const TARGET_DIR = "/mnt/linux1000/1805/"
+const BASE_DIR = "/mnt/2048/2048/CLImages/CLImages0828/"
+const TARGET_DIR = "/mnt/linux1000/1806/"
 const BAK_DIR = "/mnt/bak/2048/"
 
 func generateTargetFullPath(dirName string, imgName string) string {
@@ -143,7 +143,40 @@ func parseDoc(docPath string) (imgSrcList []string, srcDir string) {
 		})
 	})
 	return
+}
 
+func parseDocV2(docPath string) (imgSrcList []string, srcDir string) {
+	file, err := os.Open(BASE_DIR + docPath)
+	if err != nil {
+		fmt.Print(err.Error())
+		return
+	}
+
+	doc, err := goquery.NewDocumentFromReader(file)
+	if err != nil {
+		fmt.Print(err.Error())
+		return
+	}
+	defer file.Close()
+
+	imgSrcList = make([]string, 0)
+
+	doc.Find(".tpc_content").Each(func(i int, s *goquery.Selection) {
+		s.Find("img").Each(func(i int, s *goquery.Selection) {
+			src, _ := s.Attr("ess-data")
+			escape, _ := url.QueryUnescape(src)
+
+			fmt.Println(escape)
+			srcDirList := strings.Split(escape, "/")
+			if len(srcDirList) < 2 {
+				return
+			}
+			srcDir = srcDirList[len(srcDirList)-2]
+			imgName := srcDirList[len(srcDirList)-1]
+			imgSrcList = append(imgSrcList, imgName)
+		})
+	})
+	return
 }
 
 func windowString(src string, process func(string) (string, bool)) (string, bool) {
@@ -196,7 +229,7 @@ func parseImage(section Section) (Section, error) {
 		section.imgList[i] = imgSt
 
 	}
-	section.album = "1805"
+	section.album = "1806"
 	section.cover = section.imgList[0]
 
 	return section, nil

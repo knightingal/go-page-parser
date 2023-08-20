@@ -10,7 +10,7 @@ import (
 
 func initFlowDB() {
 	cfg := mysql.Config{
-		User:                 "knightingal",
+		User:                 "root",
 		Passwd:               "000000",
 		Addr:                 "localhost:3306",
 		DBName:               "flow1000",

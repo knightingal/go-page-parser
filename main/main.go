@@ -25,12 +25,15 @@ func main() {
 	initFlowDB()
 
 	go batchCommentListener()
-	fileNames := scanWebFile()
+	// fileNames := scanWebFile()
 
-	for _, fileName := range fileNames {
-		process1024Web(fileName, persistenceDir)
-	}
-	// process1024Web("[修复][動漫] [Bird Forest (梟森)] 1RTで仲悪いノンケ女子たちが1秒キスするシリーズ-付き合ってください! [中国翻訳][34P] - 新時代的我們 草榴社區 - cl.tfrw.xyz.html", persistenceDir)
+	// for _, fileName := range fileNames {
+	// 	process1024Web(fileName, persistenceDir)
+	// }
+
+	process1024Web(
+		"target.html",
+		persistenceDir)
 
 }
 
@@ -40,7 +43,7 @@ func bakDir(realDir, fileName string) {
 }
 
 func persistenceDir(realDir, fileName string) {
-	imgSrcList, _ := parseDoc(fileName)
+	imgSrcList, _ := parseDocV2(fileName)
 	if len(imgSrcList) == 0 {
 		updateLog(fileName, "img not found")
 		return
@@ -60,6 +63,7 @@ func persistenceDir(realDir, fileName string) {
 	updateLog(fileName, "succ")
 }
 
+// fileName: target html file name under TARGET_DIR
 func process1024Web(fileName string, dirProcessor func(string, string)) {
 	log.Println("process1024Web", fileName)
 
@@ -71,7 +75,7 @@ func process1024Web(fileName string, dirProcessor func(string, string)) {
 		insertLog(fileName, "")
 	}
 
-	_, srcDir := parseDoc(fileName)
+	_, srcDir := parseDocV2(fileName)
 
 	realDir, succ := matchDirName(srcDir)
 
