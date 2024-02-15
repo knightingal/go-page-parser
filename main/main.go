@@ -22,7 +22,7 @@ func batchCommentListener() {
 
 func main() {
 
-	test := false
+	test := true
 	msgChan = make(chan BatchComment)
 
 	initFlowDB()
@@ -57,8 +57,16 @@ func persistenceDir(realDir, fileName string) {
 	section := cpFiles(imgSrcList, realDir, fileName)
 
 	section, err := parseImage(section)
+
 	if err != nil {
 		updateLog(fileName, err.Error())
+		return
+	}
+
+	tx, err := db.Begin()
+	if err != nil {
+		updateLog(fileName, err.Error())
+		return
 	}
 
 	sectoinId := insertSection(section)
@@ -66,6 +74,10 @@ func persistenceDir(realDir, fileName string) {
 		insertImg(imgSt, sectoinId)
 	}
 	updateLog(fileName, "succ")
+	err = tx.Commit()
+	if err != nil {
+		updateLog(fileName, err.Error())
+	}
 }
 
 // fileName: target html file name under TARGET_DIR
