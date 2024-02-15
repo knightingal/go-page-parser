@@ -41,8 +41,11 @@ func cpFiles(imgSrcList []string, realDirName string, docPath string) Section {
 	imgList := make([]Image, 0)
 
 	os.Mkdir(TARGET_DIR+ALBUM+"/"+section.name, 0750)
+	imgIndex := 1
 	for _, imgSrc := range imgSrcList {
-		targetFile, _ := os.Create(generateTargetFullPath(section.name, imgSrc))
+		destImgFileName := fmt.Sprintf("%03d-%s", imgIndex, imgSrc)
+		imgIndex++
+		targetFile, _ := os.Create(generateTargetFullPath(section.name, destImgFileName))
 		srcFile, err := os.Open(SOURCE_DIR + realDirName + "/" + imgSrc)
 		if err != nil {
 			if os.IsNotExist(err) {
@@ -56,7 +59,7 @@ func cpFiles(imgSrcList []string, realDirName string, docPath string) Section {
 		}
 		io.Copy(targetFile, srcFile)
 		image := Image{}
-		image.name = imgSrc
+		image.name = destImgFileName
 		imgList = append(imgList, image)
 		srcFile.Close()
 		targetFile.Close()
@@ -221,6 +224,7 @@ func filter[T any](src *[]T, fn func(T) bool) *[]T {
 }
 
 func parseImage(section Section) (Section, error) {
+	totalCount := len(section.imgList)
 
 	for i, imgSt := range section.imgList {
 		imgReader, _ := os.Open(generateTargetFullPath(section.name, imgSt.name))
@@ -233,6 +237,7 @@ func parseImage(section Section) (Section, error) {
 
 		x := img.Bounds().Dx()
 		y := img.Bounds().Dy()
+		log.Default().Printf("(%d/%d) parse %s succ, height:%d, width:%d", i, totalCount, imgSt.name, y, x)
 
 		imgSt.height = y
 		imgSt.width = x
