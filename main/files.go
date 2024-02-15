@@ -167,6 +167,9 @@ func parseDocV2(docPath string, srcDir string) (imgSrcList []string) {
 	doc.Find(".tpc_content").Each(func(i int, s *goquery.Selection) {
 		s.Find("img").Each(func(i int, s *goquery.Selection) {
 			src, _ := s.Attr("ess-data")
+			if src == "" {
+				src, _ = s.Attr("src")
+			}
 			escape, _ := url.QueryUnescape(src)
 
 			fmt.Println(escape)
