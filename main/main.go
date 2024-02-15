@@ -22,20 +22,23 @@ func batchCommentListener() {
 
 func main() {
 
+	test := false
 	msgChan = make(chan BatchComment)
 
 	initFlowDB()
 
 	go batchCommentListener()
-	// fileNames := scanWebFile()
+	if test {
+		processFlow1000Web(
+			"target.html",
+			persistenceDir)
+	} else {
+		fileNames := scanWebFile()
 
-	// for _, fileName := range fileNames {
-	// 	process1024Web(fileName, persistenceDir)
-	// }
-
-	process1024Web(
-		"target.html",
-		persistenceDir)
+		for _, fileName := range fileNames {
+			processFlow1000Web(fileName, persistenceDir)
+		}
+	}
 
 }
 
@@ -66,7 +69,7 @@ func persistenceDir(realDir, fileName string) {
 }
 
 // fileName: target html file name under TARGET_DIR
-func process1024Web(fileName string, dirProcessor func(string, string)) {
+func processFlow1000Web(fileName string, dirProcessor func(string, string)) {
 	log.Println("process1024Web", fileName)
 
 	if checkSuccLog(fileName) {
