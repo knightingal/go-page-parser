@@ -18,10 +18,10 @@ import (
 	_ "golang.org/x/image/webp"
 )
 
-const SOURCE_DIR = "/mnt/2048/2048/CLImages/CLImages0828/"
+const SOURCE_DIR = "/mnt/Users/knightingal/CLImages/"
 const TARGET_DIR = "/mnt/linux1000/"
 const BAK_DIR = "/mnt/bak/2048/"
-const ALBUM = "1805"
+const ALBUM = "1803"
 
 func generateTargetFullPath(dirName string, imgName string) string {
 	return TARGET_DIR + ALBUM + "/" + dirName + "/" + imgName
@@ -71,7 +71,7 @@ func scanWebFile() []string {
 	dirEntityList, _ := fs.ReadDir(dir, ".")
 	fileNames := make([]string, 0)
 	for _, file := range dirEntityList {
-		if strings.HasSuffix(file.Name(), ".html") && strings.HasPrefix(file.Name(), "[修复]") {
+		if strings.HasSuffix(file.Name(), ".html") && !strings.HasPrefix(file.Name(), "[修复]") {
 			fileNames = append(fileNames, file.Name())
 		}
 	}
