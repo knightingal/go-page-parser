@@ -23,6 +23,9 @@ const TARGET_DIR = "/mnt/linux1000/"
 const BAK_DIR = "/mnt/bak/2048/"
 const ALBUM = "1803"
 
+// const SOURCE_DIR = "/mnt/Users/knightingal/linux1000/source/"
+// const TARGET_DIR = "/mnt/Users/knightingal/linux1000/"
+
 func generateTargetFullPath(dirName string, imgName string) string {
 	return TARGET_DIR + ALBUM + "/" + dirName + "/" + imgName
 }
@@ -67,6 +70,38 @@ func cpFiles(imgSrcList []string, realDirName string, docPath string) Section {
 	section.imgList = imgList
 
 	return section
+}
+
+func scanFLow1000Dir() []Section {
+	dir := os.DirFS(SOURCE_DIR)
+	sectionList := make([]Section, 0)
+	dirEntityList, _ := fs.ReadDir(dir, ".")
+	for _, dirEntity := range dirEntityList {
+		imgList, _ := fs.ReadDir(dir, dirEntity.Name())
+		section := Section{}
+		section.album = "encrypted"
+		section.imgList = make([]Image, 0)
+		section.name = dirEntity.Name()
+		section.clientStatus = "NONE"
+		nameArray := []rune(dirEntity.Name())
+		timeStamp := string(nameArray[0:14])
+		section.timeStamp = timeStamp
+
+		for _, img := range imgList {
+			imgName := img.Name()
+			if strings.HasSuffix(imgName, ".jpg") || strings.HasSuffix(imgName, ".jpeg") || strings.HasSuffix(imgName, ".JPG") || strings.HasSuffix(imgName, ".JPEG") || strings.HasSuffix(imgName, ".png") || strings.HasSuffix(imgName, ".PNG") {
+				image := Image{}
+				image.name = img.Name()
+				image.binName = img.Name() + ".bin"
+				section.imgList = append(section.imgList, image)
+
+			}
+			// log.Default().Printf("%s-%s", dirEntity.Name(), img.Name())
+		}
+		sectionList = append(sectionList, section)
+	}
+
+	return sectionList
 }
 
 func scanWebFile() []string {
@@ -167,8 +202,32 @@ func parseDocV2(docPath string, srcDir string) (imgSrcList []string) {
 
 	imgSrcList = make([]string, 0)
 
-	doc.Find(".tpc_content").Each(func(i int, s *goquery.Selection) {
-		s.Find("img").Each(func(i int, s *goquery.Selection) {
+	if doc.HasClass("tpc_content") {
+		doc.Find(".tpc_content").Each(func(i int, s *goquery.Selection) {
+			s.Find("img").Each(func(i int, s *goquery.Selection) {
+				src, _ := s.Attr("ess-data")
+				if src == "" {
+					src, _ = s.Attr("src")
+				}
+				escape, _ := url.QueryUnescape(src)
+
+				fmt.Println(escape)
+				srcDirList := strings.Split(escape, "/")
+				if len(srcDirList) < 2 {
+					return
+				}
+				imgName := srcDirList[len(srcDirList)-1]
+				imageFile, err := os.Open(SOURCE_DIR + srcDir + "/" + imgName)
+				if err != nil && os.IsNotExist(err) {
+					log.Println(imgName + " not exist")
+				} else {
+					imageFile.Close()
+					imgSrcList = append(imgSrcList, imgName)
+				}
+			})
+		})
+	} else {
+		doc.Find(".tpc_cont").First().Find("img").Each(func(i int, s *goquery.Selection) {
 			src, _ := s.Attr("ess-data")
 			if src == "" {
 				src, _ = s.Attr("src")
@@ -189,7 +248,7 @@ func parseDocV2(docPath string, srcDir string) (imgSrcList []string) {
 				imgSrcList = append(imgSrcList, imgName)
 			}
 		})
-	})
+	}
 	return
 }
 
