@@ -104,3 +104,18 @@ func insertImg(image Image, sectionId int64) {
 	fmt.Printf("insert %d\n", insertId)
 
 }
+
+func insertImgBin(image Image, sectionId int64) {
+	result, error := db.Exec("insert into flow1000img("+
+		"name, height, width, in_cover, section_id"+
+		") values (?,?,?,?,?)",
+		image.binName, image.height, image.width, 0, sectionId)
+
+	if error != nil {
+		log.Fatal(error)
+	}
+
+	insertId, _ := result.LastInsertId()
+	fmt.Printf("insert %d\n", insertId)
+
+}
