@@ -21,16 +21,26 @@ func batchCommentListener() {
 }
 
 func main() {
-
-	test := true
+	test := false
+	flow1000 := false
 	msgChan = make(chan BatchComment)
-
 	initFlowDB()
-
 	go batchCommentListener()
+	if flow1000 {
+		sectionList := scanFLow1000Dir()
+		for _, section := range sectionList {
+			section, _ = parseImage(section)
+			sectoinId := insertSection(section)
+			for _, imgSt := range section.imgList {
+				insertImgBin(imgSt, sectoinId)
+			}
+		}
+		return
+	}
+
 	if test {
 		processFlow1000Web(
-			"target.html",
+			"Lilit.A.A.Time.For.Pleasure[86P] - 新時代的我們   草榴社區 - t66y.com.html",
 			persistenceDir)
 	} else {
 		fileNames := scanWebFile()
@@ -116,9 +126,10 @@ type Section struct {
 }
 
 type Image struct {
-	height int
-	width  int
-	name   string
+	height  int
+	width   int
+	name    string
+	binName string
 }
 
 type BatchComment struct {
