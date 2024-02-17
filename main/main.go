@@ -21,6 +21,7 @@ func batchCommentListener() {
 }
 
 func main() {
+	legacyOrder := true
 	test := false
 	flow1000 := false
 	msgChan = make(chan BatchComment)
@@ -38,9 +39,18 @@ func main() {
 		return
 	}
 
+	if legacyOrder {
+
+		sectionList := scanLegacyDir()
+		sectionList = cpSections(sectionList)
+		println(sectionList)
+
+		return
+	}
+
 	if test {
 		processFlow1000Web(
-			"Lilit.A.A.Time.For.Pleasure[86P] - 新時代的我們   草榴社區 - t66y.com.html",
+			"target.html",
 			persistenceDir)
 	} else {
 		fileNames := scanWebFile()
@@ -64,7 +74,7 @@ func persistenceDir(realDir, fileName string) {
 		return
 	}
 	fmt.Println(realDir)
-	section := cpFiles(imgSrcList, realDir, fileName)
+	section := cpFiles(imgSrcList, realDir, fileName, true)
 
 	section, err := parseImage(section)
 
@@ -126,10 +136,11 @@ type Section struct {
 }
 
 type Image struct {
-	height  int
-	width   int
-	name    string
-	binName string
+	height       int
+	width        int
+	name         string
+	binName      string
+	milliseconds int64
 }
 
 type BatchComment struct {
