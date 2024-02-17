@@ -11,6 +11,7 @@ import (
 	"log"
 	"net/url"
 	"os"
+	"sort"
 	"strings"
 	"time"
 
@@ -18,10 +19,12 @@ import (
 	_ "golang.org/x/image/webp"
 )
 
-const SOURCE_DIR = "/mnt/Users/knightingal/CLImages/"
+// const SOURCE_DIR = "/mnt/Users/knightingal/CLImages/CLImages0828/"
 const TARGET_DIR = "/mnt/linux1000/"
 const BAK_DIR = "/mnt/bak/2048/"
-const ALBUM = "1803"
+const ALBUM = "1806"
+
+const SOURCE_DIR = "/mnt/drive1/linux1000/1803/"
 
 // const SOURCE_DIR = "/mnt/Users/knightingal/linux1000/source/"
 // const TARGET_DIR = "/mnt/Users/knightingal/linux1000/"
@@ -30,13 +33,56 @@ func generateTargetFullPath(dirName string, imgName string) string {
 	return TARGET_DIR + ALBUM + "/" + dirName + "/" + imgName
 }
 
-func cpFiles(imgSrcList []string, realDirName string, docPath string) Section {
+func cpSections(sectionList []Section) []Section {
+	outputSection := make([]Section, 0)
+
+	for _, section := range sectionList {
+		imgNameList := make([]string, 0)
+		for _, img := range section.imgList {
+			imgNameList = append(imgNameList, img.name)
+		}
+		section = cpFiles(imgNameList, section.name, section.name, false)
+
+		section, err := parseImage(section)
+
+		if err != nil {
+			updateLog(section.name, err.Error())
+			continue
+		}
+
+		tx, err := db.Begin()
+		if err != nil {
+			updateLog(section.name, err.Error())
+			continue
+		}
+
+		sectoinId := insertSection(section)
+		for _, imgSt := range section.imgList {
+			insertImg(imgSt, sectoinId)
+		}
+		updateLog(section.name, "succ")
+		err = tx.Commit()
+		if err != nil {
+			updateLog(section.name, err.Error())
+		}
+
+		outputSection = append(outputSection, section)
+
+	}
+	return outputSection
+}
+
+func cpFiles(imgSrcList []string, realDirName string, docPath string, appendStamp bool) Section {
 	now := time.Now()
 	stamp := now.Format("20060102150405")
 
 	section := Section{}
 	section.timeStamp = stamp
-	section.name = stamp + realDirName
+	if appendStamp {
+		section.name = stamp + realDirName
+	} else {
+		section.name = realDirName
+	}
 	section.webName = docPath
 	section.clientStatus = "NONE"
 	section.album = ALBUM
@@ -98,6 +144,47 @@ func scanFLow1000Dir() []Section {
 			}
 			// log.Default().Printf("%s-%s", dirEntity.Name(), img.Name())
 		}
+		sectionList = append(sectionList, section)
+	}
+
+	return sectionList
+}
+
+func scanLegacyDir() []Section {
+	dir := os.DirFS(SOURCE_DIR)
+	sectionList := make([]Section, 0)
+	dirEntityList, _ := fs.ReadDir(dir, ".")
+	for _, dirEntity := range dirEntityList {
+		imgList, _ := fs.ReadDir(dir, dirEntity.Name())
+		section := Section{}
+		section.album = ALBUM
+		section.imgList = make([]Image, 0)
+		section.name = dirEntity.Name()
+		section.clientStatus = "NONE"
+		nameArray := []rune(dirEntity.Name())
+		timeStamp := string(nameArray[0:14])
+		section.timeStamp = timeStamp
+
+		for _, img := range imgList {
+			imgName := img.Name()
+			fileInfo, _ := img.Info()
+			milliseconds := fileInfo.ModTime().UnixMilli()
+
+			if strings.HasSuffix(imgName, ".jpg") || strings.HasSuffix(imgName, ".jpeg") || strings.HasSuffix(imgName, ".JPG") || strings.HasSuffix(imgName, ".JPEG") || strings.HasSuffix(imgName, ".png") || strings.HasSuffix(imgName, ".PNG") {
+				image := Image{}
+				image.name = img.Name()
+				image.binName = img.Name()
+				image.milliseconds = milliseconds
+				section.imgList = append(section.imgList, image)
+
+			}
+			// log.Default().Printf("%s-%s", dirEntity.Name(), img.Name())
+		}
+
+		sort.Slice(section.imgList, func(i, j int) bool {
+			return section.imgList[i].milliseconds < section.imgList[j].milliseconds
+		})
+
 		sectionList = append(sectionList, section)
 	}
 
@@ -202,7 +289,7 @@ func parseDocV2(docPath string, srcDir string) (imgSrcList []string) {
 
 	imgSrcList = make([]string, 0)
 
-	if doc.HasClass("tpc_content") {
+	if true {
 		doc.Find(".tpc_content").Each(func(i int, s *goquery.Selection) {
 			s.Find("img").Each(func(i int, s *goquery.Selection) {
 				src, _ := s.Attr("ess-data")
@@ -219,7 +306,14 @@ func parseDocV2(docPath string, srcDir string) (imgSrcList []string) {
 				imgName := srcDirList[len(srcDirList)-1]
 				imageFile, err := os.Open(SOURCE_DIR + srcDir + "/" + imgName)
 				if err != nil && os.IsNotExist(err) {
-					log.Println(imgName + " not exist")
+					imgName = strings.Split(imgName, ".")[0] + ".webp"
+					imageFile, err = os.Open(SOURCE_DIR + srcDir + "/" + imgName)
+					if err != nil && os.IsNotExist(err) {
+						log.Println(imgName + " not exist")
+					} else {
+						imageFile.Close()
+						imgSrcList = append(imgSrcList, imgName)
+					}
 				} else {
 					imageFile.Close()
 					imgSrcList = append(imgSrcList, imgName)
