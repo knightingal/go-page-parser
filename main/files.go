@@ -20,13 +20,15 @@ import (
 )
 
 // const SOURCE_DIR = "/mnt/Users/knightingal/CLImages/CLImages0828/"
-const TARGET_DIR = "/mnt/linux1000/"
+// const TARGET_DIR = "/mnt/linux1000/"
 const BAK_DIR = "/mnt/bak/2048/"
-const ALBUM = "1806"
+const ALBUM = "source"
 
-const SOURCE_DIR = "/mnt/drive1/linux1000/1803/"
+// const SOURCE_DIR = "/mnt/drive1/linux1000/1803/"
 
-// const SOURCE_DIR = "/mnt/Users/knightingal/linux1000/source/"
+const SOURCE_DIR = "/mnt/linux1000/source/"
+const TARGET_DIR = "/mnt/linux1000/"
+
 // const TARGET_DIR = "/mnt/Users/knightingal/linux1000/"
 
 func generateTargetFullPath(dirName string, imgName string) string {
@@ -125,7 +127,7 @@ func scanFLow1000Dir() []Section {
 	for _, dirEntity := range dirEntityList {
 		imgList, _ := fs.ReadDir(dir, dirEntity.Name())
 		section := Section{}
-		section.album = "encrypted"
+		section.album = ALBUM
 		section.imgList = make([]Image, 0)
 		section.name = dirEntity.Name()
 		section.clientStatus = "NONE"
@@ -380,7 +382,8 @@ func parseImage(section Section) (Section, error) {
 	totalCount := len(section.imgList)
 
 	for i, imgSt := range section.imgList {
-		imgReader, _ := os.Open(generateTargetFullPath(section.name, imgSt.name))
+		filePath := generateTargetFullPath(section.name, imgSt.name)
+		imgReader, _ := os.Open(filePath)
 		img, _, err := image.Decode(imgReader)
 		if err != nil {
 			msgChan <- BatchComment{section.webName, imgSt.name + ":" + err.Error()}
