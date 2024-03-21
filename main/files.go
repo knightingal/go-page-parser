@@ -12,6 +12,7 @@ import (
 	"net/url"
 	"os"
 	"sort"
+	"strconv"
 	"strings"
 	"time"
 
@@ -146,6 +147,20 @@ func scanFLow1000Dir() []Section {
 			}
 			// log.Default().Printf("%s-%s", dirEntity.Name(), img.Name())
 		}
+
+		sort.Slice(section.imgList, func(i, j int) bool {
+			var name1 = section.imgList[i].name
+			var name2 = section.imgList[j].name
+			var pName1 = strings.Split(name1, ".")[0]
+			var pName2 = strings.Split(name2, ".")[0]
+			var index1, err1 = strconv.Atoi(pName1)
+			var index2, err2 = strconv.Atoi(pName2)
+			if err1 != nil || err2 != nil {
+				return i < j
+			}
+			return index1 < index2
+		})
+
 		sectionList = append(sectionList, section)
 	}
 
