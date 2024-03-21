@@ -12,6 +12,7 @@ import (
 	"net/url"
 	"os"
 	"sort"
+	"strconv"
 	"strings"
 	"time"
 
@@ -87,7 +88,7 @@ func cpFiles(imgSrcList []string, realDirName string, docPath string, appendStam
 	}
 	section.webName = docPath
 	section.clientStatus = "NONE"
-	section.album = ALBUM
+	section.sourceAlbum = ALBUM
 
 	imgList := make([]Image, 0)
 
@@ -120,14 +121,19 @@ func cpFiles(imgSrcList []string, realDirName string, docPath string, appendStam
 	return section
 }
 
-func scanFLow1000Dir() []Section {
+func scanFLow1000Dir(encytpe bool) []Section {
 	dir := os.DirFS(SOURCE_DIR)
 	sectionList := make([]Section, 0)
 	dirEntityList, _ := fs.ReadDir(dir, ".")
 	for _, dirEntity := range dirEntityList {
 		imgList, _ := fs.ReadDir(dir, dirEntity.Name())
 		section := Section{}
-		section.album = ALBUM
+		section.sourceAlbum = ALBUM
+		if encytpe {
+			section.destAlbum = "encrypted"
+		} else {
+			section.destAlbum = ALBUM
+		}
 		section.imgList = make([]Image, 0)
 		section.name = dirEntity.Name()
 		section.clientStatus = "NONE"
@@ -146,6 +152,22 @@ func scanFLow1000Dir() []Section {
 			}
 			// log.Default().Printf("%s-%s", dirEntity.Name(), img.Name())
 		}
+
+		if encytpe {
+			sort.Slice(section.imgList, func(i, j int) bool {
+				var name1 = section.imgList[i].name
+				var name2 = section.imgList[j].name
+				var pName1 = strings.Split(name1, ".")[0]
+				var pName2 = strings.Split(name2, ".")[0]
+				var index1, err1 = strconv.Atoi(pName1)
+				var index2, err2 = strconv.Atoi(pName2)
+				if err1 != nil || err2 != nil {
+					return i < j
+				}
+				return index1 < index2
+			})
+		}
+
 		sectionList = append(sectionList, section)
 	}
 
@@ -159,7 +181,7 @@ func scanLegacyDir() []Section {
 	for _, dirEntity := range dirEntityList {
 		imgList, _ := fs.ReadDir(dir, dirEntity.Name())
 		section := Section{}
-		section.album = ALBUM
+		section.sourceAlbum = ALBUM
 		section.imgList = make([]Image, 0)
 		section.name = dirEntity.Name()
 		section.clientStatus = "NONE"
