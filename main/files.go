@@ -137,10 +137,10 @@ func scanFLow1000Dir() []Section {
 
 		for _, img := range imgList {
 			imgName := img.Name()
-			if strings.HasSuffix(imgName, ".jpg") || strings.HasSuffix(imgName, ".jpeg") || strings.HasSuffix(imgName, ".JPG") || strings.HasSuffix(imgName, ".JPEG") || strings.HasSuffix(imgName, ".png") || strings.HasSuffix(imgName, ".PNG") {
+			if strings.HasSuffix(imgName, ".webp") || strings.HasSuffix(imgName, ".jfif") || strings.HasSuffix(imgName, ".jpg") || strings.HasSuffix(imgName, ".jpeg") || strings.HasSuffix(imgName, ".JPG") || strings.HasSuffix(imgName, ".JPEG") || strings.HasSuffix(imgName, ".png") || strings.HasSuffix(imgName, ".PNG") {
 				image := Image{}
 				image.name = img.Name()
-				image.binName = img.Name() + ".bin"
+				image.binName = img.Name()
 				section.imgList = append(section.imgList, image)
 
 			}

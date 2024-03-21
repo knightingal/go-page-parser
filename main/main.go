@@ -21,15 +21,19 @@ func batchCommentListener() {
 }
 
 func main() {
-	legacyOrder := true
+	legacyOrder := false
 	test := false
-	flow1000 := false
+	flow1000 := true
 	msgChan = make(chan BatchComment)
 	initFlowDB()
 	go batchCommentListener()
 	if flow1000 {
 		sectionList := scanFLow1000Dir()
 		for _, section := range sectionList {
+			if len(section.imgList) == 0 {
+				log.Default().Printf("[%s] scan failed", section.name)
+				continue
+			}
 			section, _ = parseImage(section)
 			sectoinId := insertSection(section)
 			for _, imgSt := range section.imgList {
