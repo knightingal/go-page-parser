@@ -24,11 +24,12 @@ func main() {
 	legacyOrder := false
 	test := false
 	flow1000 := true
+	encrytpe := true
 	msgChan = make(chan BatchComment)
 	initFlowDB()
 	go batchCommentListener()
 	if flow1000 {
-		sectionList := scanFLow1000Dir()
+		sectionList := scanFLow1000Dir(encrytpe)
 		for _, section := range sectionList {
 			section, _ = parseImage(section)
 			sectoinId := insertSection(section)
@@ -128,7 +129,8 @@ func processFlow1000Web(fileName string, dirProcessor func(string, string)) {
 type Section struct {
 	timeStamp    string
 	name         string
-	album        string
+	sourceAlbum  string
+	destAlbum    string
 	imgList      []Image
 	cover        Image
 	webName      string

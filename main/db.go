@@ -35,7 +35,7 @@ func initFlowDB() {
 func insertSection(section Section) int64 {
 	result, error := db.Exec("insert into flow1000section("+
 		"album, cover, cover_height, cover_width, create_time, dir_name, name, client_status"+
-		") values (?,?,?,?,?,?,?,?)", section.album,
+		") values (?,?,?,?,?,?,?,?)", section.destAlbum,
 		section.cover.binName,
 		section.cover.height, section.cover.width, section.timeStamp, section.name, section.name, section.clientStatus)
 
