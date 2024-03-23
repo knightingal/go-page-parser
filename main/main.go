@@ -24,7 +24,7 @@ func main() {
 	legacyOrder := false
 	test := false
 	flow1000 := true
-	encrytpe := true
+	encrytpe := false
 	msgChan = make(chan BatchComment)
 	initFlowDB()
 	go batchCommentListener()

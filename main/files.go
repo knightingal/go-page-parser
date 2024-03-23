@@ -20,16 +20,6 @@ import (
 	_ "golang.org/x/image/webp"
 )
 
-// const SOURCE_DIR = "/mnt/Users/knightingal/CLImages/CLImages0828/"
-// const TARGET_DIR = "/mnt/linux1000/"
-const BAK_DIR = "/mnt/bak/2048/"
-const ALBUM = "1803"
-
-// const SOURCE_DIR = "/mnt/drive1/linux1000/1803/"
-
-const SOURCE_DIR = "/mnt/linux1000/1803/"
-const TARGET_DIR = "/mnt/linux1000/"
-
 // const TARGET_DIR = "/mnt/Users/knightingal/linux1000/"
 
 func generateTargetFullPath(dirName string, imgName string) string {
