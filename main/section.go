@@ -42,7 +42,7 @@ func (sectionHelper MultiDirSectionHelper) ScanSection() []ISection {
 	dir := os.DirFS(sectionHelper.SourceBaseDir())
 	sectionList := make([]ISection, 0)
 
-	sectionMap := make(map[string]MultiDirSection)
+	sectionMap := make(map[string]*MultiDirSection)
 
 	dirEntityList, _ := fs.ReadDir(dir, ".")
 	for _, dirEntity := range dirEntityList {
@@ -78,11 +78,12 @@ func (sectionHelper MultiDirSectionHelper) ScanSection() []ISection {
 		// }
 		existSection, exist := sectionMap[pureName]
 		if !exist {
-			existSection = MultiDirSection{}
-			existSection.subSections = make([]Section, 0)
-			existSection.name = pureName
+			tmpExistSection := MultiDirSection{}
+			tmpExistSection.subSections = make([]Section, 0)
+			tmpExistSection.name = pureName
 
-			sectionMap[pureName] = existSection
+			sectionMap[pureName] = &tmpExistSection
+			existSection = sectionMap[pureName]
 		}
 		existSection.subSections = append(existSection.subSections, subSection)
 
