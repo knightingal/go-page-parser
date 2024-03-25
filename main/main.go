@@ -33,6 +33,7 @@ func main() {
 		multiHelper := MultiDirSectionHelper{"/home/knightingal/Downloads/20240310/", "1807"}
 		sectionList := multiHelper.ScanSection()
 		fmt.Println(sectionList[0].Name())
+		fmt.Println(sectionList[0].ImageList())
 
 		return
 	}

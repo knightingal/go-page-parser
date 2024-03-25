@@ -3,6 +3,8 @@ package main
 import (
 	"io/fs"
 	"os"
+	"sort"
+	"strconv"
 	"strings"
 	"time"
 )
@@ -10,7 +12,7 @@ import (
 type ISection interface {
 	Name() string
 
-	ImageList() Image
+	ImageList() []Image
 
 	Cover() Image
 
@@ -70,12 +72,21 @@ func (sectionHelper MultiDirSectionHelper) ScanSection() []ISection {
 			}
 		}
 
+		sort.Slice(subSection.imgList, func(i, j int) bool {
+			var name1 = subSection.imgList[i].name
+			var name2 = subSection.imgList[j].name
+			var pName1 = strings.Split(name1, ".")[0]
+			var pName2 = strings.Split(name2, ".")[0]
+			var index1, err1 = strconv.Atoi(pName1)
+			var index2, err2 = strconv.Atoi(pName2)
+			if err1 != nil || err2 != nil {
+				return i < j
+			}
+			return index1 < index2
+		})
 		// parse sub-sectoin name
 		pureName := strings.Split(subSection.name, "-")[0]
-		// index, atoiErr := strconv.Atoi(strings.Split(subSection.name, "-")[1])
-		// if atoiErr != nil {
-		// 	index = 0
-		// }
+
 		existSection, exist := sectionMap[pureName]
 		if !exist {
 			tmpExistSection := MultiDirSection{}
@@ -86,6 +97,20 @@ func (sectionHelper MultiDirSectionHelper) ScanSection() []ISection {
 			existSection = sectionMap[pureName]
 		}
 		existSection.subSections = append(existSection.subSections, subSection)
+		sort.Slice(existSection.subSections, func(i, j int) bool {
+			name1 := existSection.subSections[i].name
+			name2 := existSection.subSections[j].name
+			indexStr1, _ := strings.CutSuffix(strings.Split(name1, "-")[1], "_files")
+			indexStr2, _ := strings.CutSuffix(strings.Split(name2, "-")[1], "_files")
+
+			index1, atoiErr1 := strconv.Atoi(indexStr1)
+			index2, atoiErr2 := strconv.Atoi(indexStr2)
+			if atoiErr1 != nil || atoiErr2 != nil {
+				return i < j
+			}
+
+			return index1 < index2
+		})
 
 	}
 	for _, section := range sectionMap {
@@ -117,8 +142,13 @@ func (section MultiDirSection) CpSection() {
 }
 
 // ImageList implements ISection.
-func (section MultiDirSection) ImageList() Image {
-	panic("unimplemented")
+func (section MultiDirSection) ImageList() []Image {
+	// panic("unimplemented")
+	imageList := make([]Image, 0)
+	for _, subSection := range section.subSections {
+		imageList = append(imageList, subSection.imgList...)
+	}
+	return imageList
 }
 
 // TimeStamp implements ISection.
