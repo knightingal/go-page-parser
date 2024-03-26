@@ -34,6 +34,7 @@ type ISectionHelper interface {
 type MultiDirSectionHelper struct {
 	sourceBaseDir string
 	album         string
+	destBaseDir   string
 }
 
 func (sectionHelper MultiDirSectionHelper) SourceBaseDir() string {
@@ -145,8 +146,17 @@ func (section MultiDirSection) CpSection() {
 func (section MultiDirSection) ImageList() []Image {
 	// panic("unimplemented")
 	imageList := make([]Image, 0)
+	imageNameMap := make(map[string]interface{}, 0)
 	for _, subSection := range section.subSections {
-		imageList = append(imageList, subSection.imgList...)
+		for _, image := range subSection.imgList {
+			_, exist := imageNameMap[image.name]
+			if exist {
+				continue
+			}
+
+			imageNameMap[image.name] = image
+			imageList = append(imageList, image)
+		}
 	}
 	return imageList
 }
