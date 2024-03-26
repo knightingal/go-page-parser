@@ -35,6 +35,7 @@ func main() {
 		fmt.Println(sectionList[0].Name())
 		fmt.Println(sectionList[0].ImageList())
 		sectionList[0].CpSection(multiHelper)
+		sectionList[0].ParseSize(multiHelper)
 
 		return
 	}

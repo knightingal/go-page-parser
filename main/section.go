@@ -1,6 +1,10 @@
 package main
 
 import (
+	"image"
+	_ "image/gif"
+	_ "image/jpeg"
+	_ "image/png"
 	"io"
 	"io/fs"
 	"log"
@@ -9,6 +13,8 @@ import (
 	"strconv"
 	"strings"
 	"time"
+
+	_ "golang.org/x/image/webp"
 )
 
 type ISection interface {
@@ -149,7 +155,29 @@ func (section MultiDirSection) Cover() Image {
 
 // ParseSize implements ISection.
 func (section *MultiDirSection) ParseSize(sectionHelper ISectionHelper) {
-	panic("unimplemented")
+	for _, subSection := range section.subSections {
+		totalCount := len(subSection.imgList)
+		for i, imageItem := range subSection.imgList {
+			targetFile := (sectionHelper.DestBaseDir() + "/" + section.album + "/" + section.name + "/" + imageItem.name)
+
+			imgReader, _ := os.Open(targetFile)
+			img, _, err := image.Decode(imgReader)
+			if err != nil {
+				msgChan <- BatchComment{section.name, imageItem.name + ":" + err.Error()}
+
+				continue
+			}
+
+			x := img.Bounds().Dx()
+			y := img.Bounds().Dy()
+			log.Default().Printf("(%d/%d) parse %s succ, height:%d, width:%d", i, totalCount, imageItem.name, y, x)
+
+			imageItem.height = y
+			imageItem.width = x
+			subSection.imgList[i] = imageItem
+		}
+	}
+	log.Default().Panicln(section)
 }
 
 // CpSection implements ISection.
