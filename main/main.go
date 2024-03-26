@@ -30,10 +30,11 @@ func main() {
 	initFlowDB()
 	go batchCommentListener()
 	if testMulti {
-		multiHelper := MultiDirSectionHelper{"/home/knightingal/Downloads/20240310/", "1807", "/home/knightingal/Downloads/20240310/"}
+		multiHelper := MultiDirSectionHelper{"/home/knightingal/Downloads/20240310/", "1807", "/mnt/linux1000"}
 		sectionList := multiHelper.ScanSection()
 		fmt.Println(sectionList[0].Name())
 		fmt.Println(sectionList[0].ImageList())
+		sectionList[0].CpSection(multiHelper)
 
 		return
 	}

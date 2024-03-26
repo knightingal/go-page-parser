@@ -1,7 +1,9 @@
 package main
 
 import (
+	"io"
 	"io/fs"
+	"log"
 	"os"
 	"sort"
 	"strconv"
@@ -20,7 +22,9 @@ type ISection interface {
 
 	TimeStamp() string
 
-	CpSection()
+	CpSection(sectionHelper ISectionHelper)
+
+	ParseSize(sectionHelper ISectionHelper)
 }
 
 type ISectionHelper interface {
@@ -35,6 +39,10 @@ type MultiDirSectionHelper struct {
 	sourceBaseDir string
 	album         string
 	destBaseDir   string
+}
+
+func (sectionHelper MultiDirSectionHelper) DestBaseDir() string {
+	return sectionHelper.destBaseDir
 }
 
 func (sectionHelper MultiDirSectionHelper) SourceBaseDir() string {
@@ -93,6 +101,7 @@ func (sectionHelper MultiDirSectionHelper) ScanSection() []ISection {
 			tmpExistSection := MultiDirSection{}
 			tmpExistSection.subSections = make([]Section, 0)
 			tmpExistSection.name = pureName
+			tmpExistSection.album = sectionHelper.album
 
 			sectionMap[pureName] = &tmpExistSection
 			existSection = sectionMap[pureName]
@@ -135,11 +144,48 @@ func (section MultiDirSection) Album() string {
 
 // Cover implements ISection.
 func (section MultiDirSection) Cover() Image {
-	return section.subSections[0].cover
+	return section.subSections[0].imgList[0]
+}
+
+// ParseSize implements ISection.
+func (section *MultiDirSection) ParseSize(sectionHelper ISectionHelper) {
+	panic("unimplemented")
 }
 
 // CpSection implements ISection.
-func (section MultiDirSection) CpSection() {
+func (section MultiDirSection) CpSection(sectionHelper ISectionHelper) {
+	newDir := sectionHelper.DestBaseDir() + "/" + section.album + "/" + section.name
+
+	os.Mkdir(newDir, 0750)
+
+	imageNameMap := make(map[string]interface{}, 0)
+	for _, subSection := range section.subSections {
+		for _, image := range subSection.imgList {
+			_, exist := imageNameMap[image.name]
+			if exist {
+				continue
+			}
+
+			imageNameMap[image.name] = image
+			targetFile, _ := os.Create(sectionHelper.DestBaseDir() + "/" + section.album + "/" + section.name + "/" + image.name)
+			srcFile, err := os.Open(sectionHelper.SourceBaseDir() + "/" + subSection.name + "/" + image.name)
+
+			if err != nil {
+				if os.IsNotExist(err) {
+					msg := image.name + " not exist"
+					msgChan <- BatchComment{subSection.name, msg}
+
+					log.Println(err)
+					continue
+
+				}
+			}
+
+			io.Copy(targetFile, srcFile)
+
+		}
+	}
+
 }
 
 // ImageList implements ISection.
