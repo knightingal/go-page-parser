@@ -31,6 +31,8 @@ type ISection interface {
 	CpSection(sectionHelper ISectionHelper)
 
 	ParseSize(sectionHelper ISectionHelper)
+
+	SaveToDb()
 }
 
 type ISectionHelper interface {
@@ -141,6 +143,11 @@ type MultiDirSection struct {
 	subSections []Section
 	name        string
 	album       string
+}
+
+// SaveToDb implements ISection.
+func (section *MultiDirSection) SaveToDb() {
+	panic("unimplemented")
 }
 
 // Album implements ISection.
