@@ -32,6 +32,26 @@ func initFlowDB() {
 
 }
 
+func insertISection(section ISection) int64 {
+
+	result, error := db.Exec("insert into flow1000section("+
+		"album, cover, cover_height, cover_width, create_time, dir_name, name, client_status"+
+		") values (?,?,?,?,?,?,?,?)", section.Album(),
+		section.Cover().name,
+		section.Cover().height, section.Cover().width,
+		section.TimeStamp(),
+		section.Name(), section.Name(), section.Status())
+
+	if error != nil {
+		log.Fatal(error)
+	}
+
+	insertId, _ := result.LastInsertId()
+	fmt.Printf("insert %d", insertId)
+
+	return insertId
+}
+
 func insertSection(section Section) int64 {
 	result, error := db.Exec("insert into flow1000section("+
 		"album, cover, cover_height, cover_width, create_time, dir_name, name, client_status"+
