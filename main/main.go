@@ -34,10 +34,11 @@ func main() {
 		sectionList := multiHelper.ScanSection()
 		fmt.Println(sectionList[0].Name())
 		fmt.Println(sectionList[0].ImageList())
-		section0 := sectionList[0]
-		section0.CpSection(multiHelper)
-		section0.ParseSize(multiHelper)
-		section0.SaveToDb()
+		for _, section := range sectionList {
+			section.CpSection(multiHelper)
+			section.ParseSize(multiHelper)
+			section.SaveToDb()
+		}
 
 		return
 	}
