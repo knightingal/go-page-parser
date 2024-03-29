@@ -25,11 +25,11 @@ func main() {
 	test := false
 	flow1000 := false
 	encrytpe := false
-	testMulti := true
+	multi := true
 	msgChan = make(chan BatchComment)
 	initFlowDB()
 	go batchCommentListener()
-	if testMulti {
+	if multi {
 		multiHelper := MultiDirSectionHelper{"/home/knightingal/Downloads/20240310/", "1807", "/mnt/linux1000"}
 		sectionList := multiHelper.ScanSection()
 		fmt.Println(sectionList[0].Name())
@@ -44,6 +44,9 @@ func main() {
 	}
 
 	if flow1000 {
+		// flow1000Helper := Flow1000SectionHelper{"/home/knightingal/Downloads/20240310/", "1807", "/mnt/linux1000"}
+		// sectionList := flow1000Helper.ScanSection()
+
 		sectionList := scanFLow1000Dir(encrytpe)
 		for _, section := range sectionList {
 			if len(section.imgList) == 0 {
