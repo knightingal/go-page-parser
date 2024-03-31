@@ -189,32 +189,24 @@ func (section MultiDirSection) CpSection(sectionHelper ISectionHelper) {
 
 	os.Mkdir(newDir, 0750)
 
-	imageNameMap := make(map[string]interface{}, 0)
-	for _, subSection := range section.subSections {
-		for _, image := range subSection.imgList {
-			_, exist := imageNameMap[image.name]
-			if exist {
+	imageList := section.ImageList()
+
+	for _, imageItem := range imageList {
+		targetFile, _ := os.Create(sectionHelper.DestBaseDir() + "/" + section.album + "/" + section.name + "/" + imageItem.name)
+		srcFile, err := os.Open(sectionHelper.SourceBaseDir() + "/" + imageItem.pSection.name + "/" + imageItem.name)
+		if err != nil {
+			if os.IsNotExist(err) {
+				msg := imageItem.name + " not exist"
+				msgChan <- BatchComment{imageItem.pSection.name, msg}
+
+				log.Println(err)
 				continue
+
 			}
-
-			imageNameMap[image.name] = image
-			targetFile, _ := os.Create(sectionHelper.DestBaseDir() + "/" + section.album + "/" + section.name + "/" + image.name)
-			srcFile, err := os.Open(sectionHelper.SourceBaseDir() + "/" + subSection.name + "/" + image.name)
-
-			if err != nil {
-				if os.IsNotExist(err) {
-					msg := image.name + " not exist"
-					msgChan <- BatchComment{subSection.name, msg}
-
-					log.Println(err)
-					continue
-
-				}
-			}
-
-			io.Copy(targetFile, srcFile)
-
 		}
+
+		io.Copy(targetFile, srcFile)
+
 	}
 
 }
