@@ -160,6 +160,7 @@ type Section struct {
 }
 
 type Image struct {
+	section      *Section
 	height       int
 	width        int
 	name         string
