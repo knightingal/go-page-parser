@@ -61,7 +61,7 @@ func (sectionHelper MultiDirSectionHelper) ScanSection() []ISection {
 			imgName := img.Name()
 			if strings.HasSuffix(imgName, ".webp") || strings.HasSuffix(imgName, ".jfif") || strings.HasSuffix(imgName, ".jpg") || strings.HasSuffix(imgName, ".jpeg") || strings.HasSuffix(imgName, ".JPG") || strings.HasSuffix(imgName, ".JPEG") || strings.HasSuffix(imgName, ".png") || strings.HasSuffix(imgName, ".PNG") {
 				image := Image{}
-				image.section = &subSection
+				image.pSection = &subSection
 				image.name = img.Name()
 				image.binName = img.Name()
 				subSection.imgList = append(subSection.imgList, image)
