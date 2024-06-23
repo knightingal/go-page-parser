@@ -23,14 +23,14 @@ func batchCommentListener() {
 func main() {
 	legacyOrder := false
 	test := false
-	flow1000 := false
+	flow1000 := true
 	encrytpe := false
-	multi := true
+	multi := false
 	msgChan = make(chan BatchComment)
 	initFlowDB()
 	go batchCommentListener()
 	if multi {
-		multiHelper := MultiDirSectionHelper{"/home/knightingal/Downloads/20240331/", "1807", "/mnt/linux1000"}
+		multiHelper := MultiDirSectionHelper{"/home/knightingal/Downloads/20240515/", "1807", "/mnt/linux1000"}
 		sectionList := multiHelper.ScanSection()
 		fmt.Println(sectionList[0].Name())
 		fmt.Println(sectionList[0].ImageList())

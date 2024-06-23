@@ -398,7 +398,7 @@ func parseImage(section Section) (Section, error) {
 	totalCount := len(section.imgList)
 
 	for i, imgSt := range section.imgList {
-		filePath := generateTargetFullPath(section.name, imgSt.name)
+		filePath := SOURCE_DIR + section.name + "/" + imgSt.name
 		imgReader, _ := os.Open(filePath)
 		img, _, err := image.Decode(imgReader)
 		if err != nil {
